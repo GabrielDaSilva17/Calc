@@ -3,49 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro</title>
-    <!-- Ajustado o caminho do ícone para ser consistente, assumindo que Html.png está na pasta ASS -->
+    <title>Dashboard - Meu Projeto</title>
+    <!-- O ícone do favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="ASS/Html.png">
 
     <!-- Seu arquivo de estilos CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="signup-container">
-        <section class="signup-box">
-            <h2>Cadastre-se</h2>
-            <!-- Adicionado o ID 'signup-form' para que o JavaScript possa acessar o formulário -->
-            <form id="signup-form" action="#" method="POST">
-                <!-- Mantendo apenas o campo de e-mail, pois o Firebase Authentication lida com e-mail e senha -->
-                <div class="input-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="input-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="input-group">
-                    <label for="confirm-password">Confirmar Senha</label>
-                    <input type="password" id="confirm-password" name="confirm-password" required>
-                </div>
-                <button type="submit" class="signup-button">Criar Conta</button>
-                <p class="login-link">Já tem conta? <a href="Login.html">Faça Login</a></p>
-            </form>
-            <!-- Div para exibir mensagens de sucesso ou erro ao usuário -->
+    <main class="dashboard-container">
+        <section class="dashboard-box">
+            <h2 id="welcome-message">Bem-vindo(a)!</h2>
+            <p>Você acessou o painel de controle do seu projeto.</p>
+
+            <!-- Informações do Usuário Logado -->
+            <div class="user-info">
+                <h3>Informações da Conta</h3>
+                <p><strong>E-mail:</strong> <span id="user-email">Carregando...</span></p>
+                <p><strong>ID do Usuário:</strong> <span id="user-uid">Carregando...</span></p>
+            </div>
+
+            <hr> <!-- Separador visual -->
+
+            <!-- Seção de Salvar Novas Senhas -->
+            <div class="password-saver">
+                <h3>Salvar Nova Senha</h3>
+                <form id="save-password-form">
+                    <div class="input-group">
+                        <label for="service-name">Nome do Serviço (ex: Google, Facebook)</label>
+                        <input type="text" id="service-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="saved-password">Senha</label>
+                        <input type="password" id="saved-password" required>
+                    </div>
+                    <button type="submit" class="save-button">Salvar Senha</button>
+                </form>
+                <p class="security-warning">
+                    <strong>AVISO DE SEGURANÇA:</strong> Para uma aplicação real, senhas devem ser criptografadas antes de serem armazenadas ou apenas referências a um gerenciador de senhas seguro devem ser usadas. Armazenar senhas em texto puro é perigoso.
+                </p>
+            </div>
+
+            <hr> <!-- Separador visual -->
+
+            <!-- Seção de Senhas Salvas -->
+            <div class="saved-passwords-list">
+                <h3>Minhas Senhas Salvas</h3>
+                <ul id="passwords-list">
+                    <!-- Senhas serão carregadas aqui via JavaScript -->
+                    <li>Nenhuma senha salva ainda.</li>
+                </ul>
+            </div>
+
+            <!-- Botão de Sair (Logout) -->
+            <button id="logout-button" class="logout-button">Sair</button>
+
+            <!-- Div para exibir mensagens (ex: logout bem-sucedido, senha salva) -->
             <div id="message-box" class="message-box" style="display:none;"></div>
         </section>
     </main>
 
-    <!-- Script para inicializar o Firebase e gerenciar o cadastro -->
+    <!-- Script para inicializar o Firebase, gerenciar a sessão, salvar/carregar senhas e o logout -->
     <script type="module">
-        // Importa as funções necessárias do Firebase SDK
-        // Usando a mesma versão (11.8.1) para consistência com o login.html
+        // Importa as funções necessárias do Firebase SDK (Autenticação e Firestore)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-        // getAnalytics não é necessário para a funcionalidade de cadastro básica, então foi removido.
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+        // Importa as funções do Firestore
+        import { getFirestore, collection, addDoc, query, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-        // Suas credenciais do Firebase (incorporadas diretamente neste arquivo)
+        // Adicionando um log para verificar se 'doc' é importado corretamente no carregamento do módulo
+        console.log("Tipo de 'doc' após importação:", typeof doc);
+
+        // Suas credenciais do Firebase (as mesmas usadas em login.html e cadastrar.html)
         const firebaseConfig = {
             apiKey: "AIzaSyDXU_8LsG_i6l6AHZ59MSRpq8SV__GGfks",
             authDomain: "banco-de-dados-42666.firebaseapp.com",
@@ -58,8 +87,14 @@
 
         // Inicializa o Firebase com suas configurações
         const app = initializeApp(firebaseConfig);
-        // Obtém a instância do serviço de autenticação do Firebase
+        // Obtém as instâncias dos serviços de autenticação e Firestore
         const auth = getAuth(app);
+        const db = getFirestore(app); // Inicializa o Firestore
+
+        // Adicionando um log para verificar se 'db' é inicializado corretamente
+        console.log("Variável 'db' inicializada:", db);
+
+        let userId = null; // Variável para armazenar o UID do usuário logado
 
         // --- Funções Auxiliares ---
 
@@ -67,72 +102,146 @@
         function showMessage(message, type = 'success') {
             const messageBox = document.getElementById('message-box');
             messageBox.textContent = message;
-            // Adiciona classes CSS para estilizar a mensagem (verde para sucesso, vermelho para erro)
             messageBox.className = `message-box ${type}`;
-            messageBox.style.display = 'block'; // Torna a caixa visível
+            messageBox.style.display = 'block';
 
-            // Esconde a mensagem automaticamente após 5 segundos
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 5000);
         }
 
-        // --- Lógica de Cadastro ---
+        // --- Lógica de Autenticação e Carregamento de Dados ---
 
-        // Pega o formulário de cadastro pelo ID
-        const signupForm = document.getElementById('signup-form');
+        // Observa mudanças no estado de autenticação do usuário
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado
+                userId = user.uid; // Guarda o UID do usuário
+                console.log('Usuário logado:', user.email);
+                document.getElementById('welcome-message').textContent = `Bem-vindo(a), ${user.email}!`;
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-uid').textContent = user.uid;
 
-        // Adiciona um "ouvinte de evento" para quando o formulário for enviado
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impede o comportamento padrão do formulário (que recarrega a página)
+                // Carrega as senhas do Firestore assim que o usuário estiver logado
+                loadUserPasswords(userId);
 
-            // Pega os valores digitados nos campos de e-mail, senha e confirmação de senha
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+            } else {
+                // Usuário NÃO está logado
+                console.log('Nenhum usuário logado. Redirecionando para a página de login...');
+                showMessage('Você precisa estar logado para acessar esta página.', 'error');
+                // Redireciona para a página de login se não houver usuário autenticado
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        });
 
-            // Validação: verifica se as senhas coincidem
-            if (password !== confirmPassword) {
-                showMessage('As senhas não coincidem!', 'error');
-                return; // Impede o envio do formulário se as senhas não combinarem
+        // --- Lógica de Logout ---
+
+        // Lidar com o clique do botão de logout
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                await signOut(auth); // Desloga o usuário do Firebase
+                console.log('Usuário deslogado com sucesso.');
+                showMessage('Sessão encerrada com sucesso! Redirecionando...', 'success');
+                // Redireciona para a página de login após o logout
+                setTimeout(() => {
+                    window.location.href = 'Login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error.message);
+                showMessage('Erro ao sair. Por favor, tente novamente.', 'error');
+            }
+        });
+
+        // --- Lógica de Salvar Senhas no Firestore ---
+
+        const savePasswordForm = document.getElementById('save-password-form');
+        savePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!userId) {
+                showMessage('Erro: Usuário não logado. Por favor, faça login novamente.', 'error');
+                return;
+            }
+
+            const serviceName = document.getElementById('service-name').value.trim();
+            const savedPassword = document.getElementById('saved-password').value.trim();
+
+            if (!serviceName || !savedPassword) {
+                showMessage('Por favor, preencha o nome do serviço e a senha.', 'error');
+                return;
             }
 
             try {
-                // Tenta criar um novo usuário no Firebase com o e-mail e a senha fornecidos
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user; // O objeto user contém informações do usuário recém-criado
+                // Adiciona um novo documento na subcoleção 'passwords' do usuário logado
+                // IMPORTANTE: Em um ambiente de produção, implemente criptografia forte para as senhas!
+                await addDoc(collection(db, `users/${userId}/passwords`), {
+                    service: serviceName,
+                    password: savedPassword, // AVISO DE SEGURANÇA: NUNCA armazene senhas em texto puro em produção!
+                    createdAt: new Date()
+                });
 
-                console.log('Usuário cadastrado com sucesso:', user); // Informação útil para depuração no console
-                showMessage('Cadastro realizado com sucesso! Redirecionando para o login...', 'success'); // Exibe mensagem de sucesso
-
-                // Redireciona o usuário para a página de login após o cadastro bem-sucedido
-                setTimeout(() => {
-                    window.location.href = 'Login.html';
-                }, 2000); // Redireciona após 2 segundos
+                showMessage('Senha salva com sucesso!', 'success');
+                savePasswordForm.reset(); // Limpa o formulário após salvar
 
             } catch (error) {
-                // Captura e trata qualquer erro que o Firebase possa retornar durante o cadastro
-                let errorMessage = 'Erro ao cadastrar. Por favor, tente novamente.';
-
-                // Mensagens de erro mais amigáveis com base no código do erro do Firebase
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'Este e-mail já está em uso.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'O formato do e-mail é inválido.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
-                        break;
-                    default:
-                        console.error('Erro de cadastro do Firebase:', error.message); // Log do erro completo para depuração
-                        errorMessage = `Ocorreu um erro inesperado: ${error.message}`;
-                        break;
-                }
-                showMessage(errorMessage, 'error'); // Exibe a mensagem de erro na tela
+                console.error('Erro ao salvar senha:', error.message);
+                showMessage('Erro ao salvar senha. Tente novamente.', 'error');
             }
         });
+
+        // --- Lógica de Carregar e Exibir Senhas do Firestore (Realtime) ---
+        // COMENTÁRIO: Embora o título diga "Realtime", esta seção usa funções do Firestore.
+
+        function loadUserPasswords(uid) {
+            const passwordsList = document.getElementById('passwords-list');
+            const userPasswordsCollectionRef = collection(db, `users/${uid}/passwords`);
+
+            // Usa onSnapshot para ouvir atualizações em tempo real
+            onSnapshot(userPasswordsCollectionRef, (snapshot) => {
+                passwordsList.innerHTML = ''; // Limpa a lista existente
+
+                if (snapshot.empty) {
+                    passwordsList.innerHTML = '<li>Nenhuma senha salva ainda.</li>';
+                    return;
+                }
+
+                snapshot.forEach((docItem) => { // Renomeado 'doc' para 'docItem' para evitar conflito
+                    const data = docItem.data();
+                    const li = document.createElement('li');
+                    li.classList.add('password-item'); // Adiciona classe para estilização
+
+                    li.innerHTML = `
+                        <strong>Serviço:</strong> ${data.service} <br>
+                        <strong>Senha:</strong> ${data.password}
+                        <button class="delete-button" data-id="${docItem.id}">Excluir</button>
+                    `;
+                    passwordsList.appendChild(li);
+
+                    // Adiciona evento de clique para o botão de exclusão
+                    li.querySelector('.delete-button').addEventListener('click', async (e) => {
+                        const passwordId = e.target.dataset.id;
+                        console.log("Tentando excluir senha com ID:", passwordId);
+                        console.log("Tipo de 'doc' no handler de exclusão:", typeof doc); // Verifique o tipo de doc aqui
+                        console.log("Valor de 'db' no handler de exclusão:", db); // Verifique se db está definido
+
+                        try {
+                            // AQUI É A LINHA QUE ESTÁ DANDO O ERRO
+                            await deleteDoc(doc(db, `users/${uid}/passwords`, passwordId));
+                            showMessage('Senha excluída com sucesso!', 'success');
+                        } catch (error) {
+                            console.error('Erro ao excluir senha:', error.message);
+                            showMessage('Erro ao excluir senha.', 'error');
+                        }
+                    });
+                });
+            }, (error) => {
+                console.error('Erro ao carregar senhas:', error);
+                showMessage('Erro ao carregar suas senhas.', 'error');
+            });
+        }
     </script>
 </body>
 </html>
