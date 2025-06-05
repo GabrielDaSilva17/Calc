@@ -1,150 +1,19 @@
-/* style.css - Estilos Unificados para Login e Cadastro */
+/* style.css - Estilos Aprimorados para Todas as Páginas de Autenticação e Dashboard */
 
 /* Estilos Gerais do Body */
 body {
-    font-family: Arial, sans-serif; /* Define a fonte padrão para o corpo */
-    margin: 0; /* Remove margens padrão do corpo */
-    display: flex; /* Usa flexbox para centralizar o conteúdo */
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
-    min-height: 100vh; /* Garante que o corpo ocupe a altura total da viewport */
-    background-color: #f0f2f5; /* Cor de fundo suave para a página */
+    font-family: 'Inter', sans-serif; /* Preferindo uma fonte mais moderna */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e0f2f7; /* Um azul claro suave */
+    color: #333; /* Cor de texto padrão mais escura */
 }
 
-/* Estilos para os Containers (Login e Cadastro) */
-/* Aplicado à tag <main> que envolve a seção de login/cadastro */
+/* Estilos para os Containers (Login, Cadastro, Dashboard) */
 main {
-    display: flex; /* Usa flexbox para o container principal */
-    justify-content: center; /* Centraliza o conteúdo da seção horizontalmente */
-    align-items: center; /* Centraliza o conteúdo da seção verticalmente */
-    width: 100%; /* Ocupa a largura total disponível */
-    padding: 20px; /* Adiciona um padding para evitar que o conteúdo encoste nas bordas */
-    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
-}
-
-/* Estilos para as Caixas de Formulário (Login e Cadastro) */
-/* Aplicado à tag <section> que contém o formulário */
-section {
-    background-color: #fff; /* Fundo branco para a caixa */
-    padding: 30px; /* Espaçamento interno */
-    border-radius: 8px; /* Cantos arredondados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
-    width: 100%; /* Ocupa a largura total do container */
-    max-width: 400px; /* Largura máxima da caixa de formulário */
-    text-align: center; /* Centraliza o texto dentro da caixa */
-    box-sizing: border-box; /* Inclui padding e borda na largura total */
-}
-
-/* Títulos dos Formulários (Login e Cadastre-se) */
-section h2 {
-    margin-bottom: 25px; /* Margem inferior para separar do formulário */
-    color: #333; /* Cor do texto */
-    font-size: 28px; /* Tamanho da fonte */
-}
-
-/* Estilos para os Grupos de Input (div que envolve label e input) */
-.input-group {
-    margin-bottom: 20px; /* Espaçamento entre os grupos de input */
-    text-align: left; /* Alinha o texto (label) à esquerda */
-}
-
-/* Estilos para as Labels (Etiquetas dos Campos) */
-.input-group label {
-    display: block; /* Faz a label ocupar a linha inteira */
-    margin-bottom: 8px; /* Espaçamento entre a label e o input */
-    color: #555; /* Cor do texto */
-    font-weight: bold; /* Deixa o texto em negrito */
-}
-
-/* Estilos para os Campos de Input de Texto, E-mail e Senha */
-.input-group input[type="text"],
-.input-group input[type="email"],
-.input-group input[type="password"] {
-    width: calc(100% - 20px); /* Ocupa a largura total menos o padding */
-    padding: 12px 10px; /* Padding interno para os campos */
-    border: 1px solid #ddd; /* Borda fina e cinza */
-    border-radius: 5px; /* Cantos arredondados */
-    font-size: 16px; /* Tamanho da fonte do texto digitado */
-    box-sizing: border-box; /* Garante que padding e borda não aumentem a largura total */
-}
-
-/* Estilos ao Focar nos Campos de Input */
-.input-group input[type="text"]:focus,
-.input-group input[type="email"]:focus,
-.input-group input[type="password"]:focus {
-    border-color: #007bff; /* Borda azul ao focar */
-    outline: none; /* Remove o contorno padrão do navegador */
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra azul suave ao focar */
-}
-
-/* Estilos Comuns para os Botões (Login e Cadastro) */
-.login-button,
-.signup-button {
-    background-color: #007bff; /* Cor de fundo azul padrão */
-    color: #fff; /* Cor do texto branco */
-    padding: 12px 20px; /* Padding interno */
-    border: none; /* Remove borda */
-    border-radius: 5px; /* Cantos arredondados */
-    font-size: 18px; /* Tamanho da fonte */
-    cursor: pointer; /* Muda o cursor para indicar que é clicável */
-    width: 100%; /* Ocupa a largura total */
-    transition: background-color 0.3s ease; /* Transição suave na cor de fundo ao hover */
-}
-
-/* Estilo para o Botão de Cadastro (se quiser cor diferente) */
-.signup-button {
-    background-color: #28a745; /* Verde para o botão de cadastro */
-}
-
-/* Efeitos de Hover para Botões */
-.login-button:hover {
-    background-color: #0056b3; /* Azul mais escuro ao passar o mouse */
-}
-
-.signup-button:hover {
-    background-color: #218838; /* Verde mais escuro ao passar o mouse */
-}
-
-/* Estilos para os Parágrafos de Links (Esqueci Senha, Cadastre-se, Faça Login) */
-p {
-    margin-top: 15px; /* Margem superior */
-    font-size: 14px; /* Tamanho da fonte */
-}
-
-/* Estilos para os Links dentro dos Parágrafos */
-p a {
-    color: #007bff; /* Cor azul para os links */
-    text-decoration: none; /* Remove o sublinhado padrão */
-}
-
-/* Efeito de Hover para Links */
-p a:hover {
-    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
-}
-
-/* --- Estilos para a Caixa de Mensagem (Sucesso/Erro) --- */
-.message-box {
-    padding: 10px 15px; /* Espaçamento interno */
-    margin-top: 20px; /* Margem superior */
-    border-radius: 5px; /* Cantos arredondados */
-    font-size: 14px; /* Tamanho da fonte */
-    text-align: center; /* Texto centralizado */
-    color: #fff; /* Cor do texto branco */
-    font-weight: bold; /* Deixa o texto em negrito */
-    /* display: none; é definido via JS inicialmente */
-}
-
-.message-box.success {
-    background-color: #28a745; /* Fundo verde para mensagens de sucesso */
-}
-
-.message-box.error {
-    background-color: #dc3545; /* Fundo vermelho para mensagens de erro */
-}
-
-/* --- Estilos para a Página de Dashboard (se for usada) --- */
-/* Estes estilos já foram fornecidos na resposta anterior, mas estão aqui para referência */
-.dashboard-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -153,40 +22,309 @@ p a:hover {
     box-sizing: border-box;
 }
 
-.dashboard-box {
-    background-color: #fff;
+/* Estilos para as Caixas de Formulário/Seções (Login, Cadastro, Dashboard) */
+section {
+    background-color: #ffffff; /* Fundo branco */
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* Cantos mais arredondados */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Sombra mais pronunciada */
     width: 100%;
-    max-width: 500px;
+    max-width: 450px; /* Largura um pouco maior para acomodar mais conteúdo */
     text-align: center;
     box-sizing: border-box;
+    border: 1px solid #e0e0e0; /* Borda suave */
 }
 
-.dashboard-box h2 {
-    margin-bottom: 25px;
-    color: #333;
-    font-size: 28px;
+/* Títulos das Seções */
+section h2 {
+    margin-bottom: 30px;
+    color: #2c3e50; /* Cor de título mais forte */
+    font-size: 32px;
+    font-weight: 700; /* Negrito */
 }
 
-.dashboard-box p {
-    margin-bottom: 20px;
-    color: #666;
+/* Estilos para os Parágrafos de Conteúdo */
+p {
+    margin-bottom: 15px;
+    line-height: 1.6; /* Espaçamento entre linhas para melhor legibilidade */
 }
 
-.logout-button {
-    background-color: #f44336; /* Vermelho para sair */
-    color: #fff;
-    padding: 12px 20px;
+/* Linha Separadora */
+hr {
     border: none;
-    border-radius: 5px;
+    border-top: 1px solid #e0e0e0;
+    margin: 25px 0;
+}
+
+/* Estilos para os Grupos de Input */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4a4a4a;
+    font-weight: 600; /* Mais negrito */
+    font-size: 15px;
+}
+
+.input-group input[type="text"],
+.input-group input[type="email"],
+.input-group input[type="password"] {
+    width: calc(100% - 24px); /* Ajuste o padding para 12px de cada lado */
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px; /* Cantos mais arredondados */
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Estilos ao Focar nos Campos de Input */
+.input-group input[type="text"]:focus,
+.input-group input[type="email"]:focus,
+.input-group input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2); /* Sombra mais suave ao focar */
+}
+
+/* Estilos Comuns para os Botões */
+button[type="submit"],
+.save-button,
+.logout-button {
+    padding: 14px 25px; /* Padding maior */
+    border: none;
+    border-radius: 8px; /* Cantos arredondados */
     font-size: 18px;
+    font-weight: 600;
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.3s ease;
+    margin-top: 10px; /* Margem superior */
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+/* Botão de Login */
+.login-button {
+    background-color: #007bff; /* Azul vibrante */
+    color: #fff;
+}
+.login-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px); /* Efeito de elevação ao hover */
+}
+
+/* Botão de Cadastro */
+.signup-button {
+    background-color: #28a745; /* Verde vibrante */
+    color: #fff;
+}
+.signup-button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Botão de Salvar Senha */
+.save-button {
+    background-color: #6f42c1; /* Roxo */
+    color: #fff;
+}
+.save-button:hover {
+    background-color: #5a37a1;
+    transform: translateY(-2px);
+}
+
+/* Botão de Logout */
+.logout-button {
+    background-color: #dc3545; /* Vermelho */
+    color: #fff;
+    margin-top: 25px; /* Mais margem superior para o botão de sair */
+}
 .logout-button:hover {
-    background-color: #d32f2f; /* Vermelho mais escuro ao hover */
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* Estilos para os Parágrafos de Links */
+p.forgot-password,
+p.signup-link,
+p.login-link {
+    margin-top: 20px; /* Mais espaço para links */
+    font-size: 14px;
+}
+
+p.forgot-password a,
+p.signup-link a,
+p.login-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+p.forgot-password a:hover,
+p.signup-link a:hover,
+p.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* --- Estilos para a Caixa de Mensagem (Sucesso/Erro) --- */
+.message-box {
+    padding: 12px 18px;
+    margin-top: 25px; /* Mais margem */
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+    opacity: 0.95; /* Leve transparência */
+    transition: opacity 0.3s ease;
+}
+
+.message-box.success {
+    background-color: #28a745; /* Verde */
+}
+
+.message-box.error {
+    background-color: #dc3545; /* Vermelho */
+}
+
+/* --- Estilos Específicos para a Dashboard --- */
+
+/* Informações do Usuário Logado */
+.user-info {
+    text-align: left;
+    margin-bottom: 20px;
+    background-color: #f8f9fa; /* Fundo levemente cinza */
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.user-info h3 {
+    font-size: 20px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.user-info p {
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.user-info strong {
+    color: #333;
+}
+
+/* Seção de Salvar Novas Senhas */
+.password-saver h3 {
+    font-size: 20px;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.security-warning {
+    background-color: #fff3cd; /* Fundo amarelo claro */
+    color: #856404; /* Texto amarelo escuro */
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    margin-top: 20px;
+}
+
+.security-warning strong {
+    color: #856404;
+}
+
+/* Seção de Senhas Salvas */
+.saved-passwords-list h3 {
+    font-size: 20px;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+#passwords-list {
+    list-style: none; /* Remove marcadores de lista */
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.password-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex; /* Para alinhar serviço, senha e botão */
+    flex-direction: column; /* Coloca itens em coluna no mobile */
+    align-items: flex-start; /* Alinha itens à esquerda */
+    gap: 8px; /* Espaçamento entre elementos */
+    font-size: 15px;
+    word-break: break-word; /* Quebra palavras longas */
+}
+
+.password-item strong {
+    color: #333;
+}
+
+.password-item .delete-button {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    align-self: flex-end; /* Alinha o botão à direita na coluna */
+    width: auto; /* Ajusta largura do botão */
+    margin-top: 10px; /* Margem superior para separar do texto da senha */
+}
+
+.password-item .delete-button:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Responsividade Básica para telas menores */
+@media (max-width: 600px) {
+    section {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    section h2 {
+        font-size: 28px;
+    }
+
+    .input-group input[type="text"],
+    .input-group input[type="email"],
+    .input-group input[type="password"],
+    button[type="submit"],
+    .save-button,
+    .logout-button {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .password-item {
+        padding: 12px;
+        flex-direction: column; /* Sempre em coluna no mobile */
+        align-items: flex-start;
+    }
+
+    .password-item .delete-button {
+        width: 100%; /* Botão de excluir ocupa toda a largura no mobile */
+        margin-top: 15px;
+    }
 }
