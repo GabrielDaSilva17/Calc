@@ -131,7 +131,7 @@
                 showMessage('Você precisa estar logado para acessar esta página.', 'error');
                 // Redireciona para a página de login se não houver usuário autenticado
                 setTimeout(() => {
-                    window.location.href = 'Login.html';
+                    window.location.href = 'login.html';
                 }, 2000);
             }
         });
@@ -146,7 +146,7 @@
                 showMessage('Sessão encerrada com sucesso! Redirecionando...', 'success');
                 // Redireciona para a página de login após o logout
                 setTimeout(() => {
-                    window.location.href = 'Login.html';
+                    window.location.href = 'login.html';
                 }, 2000);
 
             } catch (error) {
