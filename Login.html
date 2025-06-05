@@ -5,8 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login</title>
+    <!-- Certifique-se de que o caminho para o seu ícone está correto -->
     <link rel="shortcut icon" type="image/x-icon" href="ASS/Html.png">
 
+    <!-- Seu arquivo de estilos CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -25,21 +27,21 @@
                     <input type="password" id="password" name="password" required>
                 </div>
                 <button type="submit" class="login-button">Entrar</button>
-                <p class="forgot-password"><a href="#">Esqueci minha senha</a></p>
-                <p class="signup-link">Não tem conta? <a href="index.html">Cadastre-se</a></p>
+                <!-- Adicionado ID ao link "Esqueci minha senha" para JavaScript -->
+                <p class="forgot-password"><a href="#" id="forgot-password-link">Esqueci minha senha</a></p>
+                <p class="signup-link">Não tem conta? <a href="cadastrar.html">Cadastre-se</a></p>
             </form>
             <div id="message-box" class="message-box" style="display:none;"></div>
         </section>
     </main>
 
+    <!-- Script para inicializar o Firebase e gerenciar o login e redefinição de senha -->
     <script type="module">
         // Importa as funções necessárias do Firebase SDK
-        // A versão (11.8.1) é a que você está usando, então a mantivemos.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-        // getAnalytics não é necessário para a funcionalidade de login/cadastro, então foi removido.
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
-        // Suas credenciais do Firebase (incorporadas diretamente neste arquivo)
+        // Suas credenciais do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDXU_8LsG_i6l6AHZ59MSRpq8SV__GGfks",
             authDomain: "banco-de-dados-42666.firebaseapp.com",
@@ -61,11 +63,9 @@
         function showMessage(message, type = 'success') {
             const messageBox = document.getElementById('message-box');
             messageBox.textContent = message;
-            // Adiciona classes CSS para estilizar a mensagem (verde para sucesso, vermelho para erro)
             messageBox.className = `message-box ${type}`;
-            messageBox.style.display = 'block'; // Torna a caixa visível
+            messageBox.style.display = 'block';
 
-            // Esconde a mensagem automaticamente após 5 segundos
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 5000);
@@ -73,35 +73,22 @@
 
         // --- Lógica de Login ---
 
-        // Pega o formulário de login pelo ID
         const loginForm = document.getElementById('login-form');
-
-        // Adiciona um "ouvinte de evento" para quando o formulário for enviado
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impede o comportamento padrão do formulário (que recarrega a página)
+            e.preventDefault();
 
-            // Pega os valores digitados nos campos de e-mail e senha
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                // Tenta fazer o login no Firebase com o e-mail e a senha fornecidos
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user; // O objeto user contém informações do usuário logado
-
-                console.log('Usuário logado com sucesso:', user); // Informação útil para depuração no console
-                showMessage('Login realizado com sucesso! Bem-vindo!', 'success'); // Exibe mensagem de sucesso
-
-                // Redireciona o usuário para uma nova página após o login bem-sucedido
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage('Login realizado com sucesso! Bem-vindo!', 'success');
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html'; // Mude 'dashboard.html' para sua página principal
-                }, 2000); // Redireciona após 2 segundos
+                    window.location.href = 'dashboard.html';
+                }, 2000);
 
             } catch (error) {
-                // Captura e trata qualquer erro que o Firebase possa retornar durante o login
                 let errorMessage = 'Erro ao fazer login. Por favor, verifique suas credenciais.';
-
-                // Mensagens de erro mais amigáveis com base no código do erro do Firebase
                 switch (error.code) {
                     case 'auth/invalid-email':
                         errorMessage = 'E-mail inválido. Por favor, verifique o formato.';
@@ -111,20 +98,60 @@
                         break;
                     case 'auth/user-not-found':
                     case 'auth/wrong-password':
-                        // Para segurança, é melhor dar uma mensagem genérica para e-mail ou senha incorretos
                         errorMessage = 'E-mail ou senha incorretos.';
                         break;
                     case 'auth/too-many-requests':
                          errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
                          break;
                     default:
-                        console.error('Erro de login do Firebase:', error.message); // Log do erro completo para depuração
-                        errorMessage = `Ocorreu um erro inesperado: ${error.message}`;
+                        console.error('Erro de login do Firebase:', error.message);
+                        errorMessage = `Ocorreu um erro: ${error.message}`;
                         break;
                 }
-                showMessage(errorMessage, 'error'); // Exibe a mensagem de erro na tela
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        // --- Lógica "Esqueci a Senha" ---
+
+        // Pega o link "Esqueci minha senha"
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+        // Adiciona um "ouvinte de evento" para quando o link for clicado
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault(); // Impede o comportamento padrão do link
+
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value; // Tenta pegar o e-mail do campo de login
+
+            if (!email) {
+                showMessage('Por favor, digite seu e-mail no campo acima para redefinir a senha.', 'error');
+                emailInput.focus(); // Coloca o foco no campo de e-mail
+                return;
+            }
+
+            try {
+                // Envia o e-mail de redefinição de senha para o e-mail fornecido
+                await sendPasswordResetEmail(auth, email);
+                showMessage(`Um e-mail de redefinição de senha foi enviado para ${email}. Verifique sua caixa de entrada (e spam)!`, 'success');
+            } catch (error) {
+                let errorMessage = 'Erro ao enviar e-mail de redefinição de senha.';
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido. Por favor, verifique o formato.';
+                        break;
+                    case 'auth/user-not-found':
+                        // Por segurança, é melhor não informar se o e-mail existe ou não
+                        errorMessage = 'Se o e-mail estiver correto, um link de redefinição será enviado.';
+                        break;
+                    default:
+                        console.error('Erro de redefinição de senha do Firebase:', error.message);
+                        errorMessage = `Ocorreu um erro: ${error.message}`;
+                        break;
+                }
+                showMessage(errorMessage, 'error');
             }
         });
     </script>
-    </body>
+</body>
 </html>
