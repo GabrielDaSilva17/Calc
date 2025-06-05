@@ -71,6 +71,9 @@
         // Importa as funções do Firestore
         import { getFirestore, collection, addDoc, query, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
+        // Adicionando um log para verificar se 'doc' é importado corretamente no carregamento do módulo
+        console.log("Tipo de 'doc' após importação:", typeof doc);
+
         // Suas credenciais do Firebase (as mesmas usadas em login.html e cadastrar.html)
         const firebaseConfig = {
             apiKey: "AIzaSyDXU_8LsG_i6l6AHZ59MSRpq8SV__GGfks",
@@ -87,6 +90,9 @@
         // Obtém as instâncias dos serviços de autenticação e Firestore
         const auth = getAuth(app);
         const db = getFirestore(app); // Inicializa o Firestore
+
+        // Adicionando um log para verificar se 'db' é inicializado corretamente
+        console.log("Variável 'db' inicializada:", db);
 
         let userId = null; // Variável para armazenar o UID do usuário logado
 
@@ -125,7 +131,7 @@
                 showMessage('Você precisa estar logado para acessar esta página.', 'error');
                 // Redireciona para a página de login se não houver usuário autenticado
                 setTimeout(() => {
-                    window.location.href = 'Login.html';
+                    window.location.href = 'login.html';
                 }, 2000);
             }
         });
@@ -140,7 +146,7 @@
                 showMessage('Sessão encerrada com sucesso! Redirecionando...', 'success');
                 // Redireciona para a página de login após o logout
                 setTimeout(() => {
-                    window.location.href = 'Login.html';
+                    window.location.href = 'login.html';
                 }, 2000);
 
             } catch (error) {
@@ -187,6 +193,7 @@
         });
 
         // --- Lógica de Carregar e Exibir Senhas do Firestore (Realtime) ---
+        // COMENTÁRIO: Embora o título diga "Realtime", esta seção usa funções do Firestore.
 
         function loadUserPasswords(uid) {
             const passwordsList = document.getElementById('passwords-list');
@@ -201,22 +208,27 @@
                     return;
                 }
 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
+                snapshot.forEach((docItem) => { // Renomeado 'doc' para 'docItem' para evitar conflito
+                    const data = docItem.data();
                     const li = document.createElement('li');
                     li.classList.add('password-item'); // Adiciona classe para estilização
 
                     li.innerHTML = `
                         <strong>Serviço:</strong> ${data.service} <br>
                         <strong>Senha:</strong> ${data.password}
-                        <button class="delete-button" data-id="${doc.id}">Excluir</button>
+                        <button class="delete-button" data-id="${docItem.id}">Excluir</button>
                     `;
                     passwordsList.appendChild(li);
 
                     // Adiciona evento de clique para o botão de exclusão
                     li.querySelector('.delete-button').addEventListener('click', async (e) => {
                         const passwordId = e.target.dataset.id;
+                        console.log("Tentando excluir senha com ID:", passwordId);
+                        console.log("Tipo de 'doc' no handler de exclusão:", typeof doc); // Verifique o tipo de doc aqui
+                        console.log("Valor de 'db' no handler de exclusão:", db); // Verifique se db está definido
+
                         try {
+                            // AQUI É A LINHA QUE ESTÁ DANDO O ERRO
                             await deleteDoc(doc(db, `users/${uid}/passwords`, passwordId));
                             showMessage('Senha excluída com sucesso!', 'success');
                         } catch (error) {
