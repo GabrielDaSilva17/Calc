@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <!-- Ajustado o caminho do ícone para ser consistente, assumindo que Html.png está na pasta ASS -->
+    <link rel="shortcut icon" type="image/x-icon" href="ASS/Html.png">
+
+    <!-- Seu arquivo de estilos CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="signup-container">
+        <section class="signup-box">
+            <h2>Cadastre-se</h2>
+            <!-- Adicionado o ID 'signup-form' para que o JavaScript possa acessar o formulário -->
+            <form id="signup-form" action="#" method="POST">
+                <!-- Mantendo apenas o campo de e-mail, pois o Firebase Authentication lida com e-mail e senha -->
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Confirmar Senha</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit" class="signup-button">Criar Conta</button>
+                <p class="login-link">Já tem conta? <a href="Login.html">Faça Login</a></p>
+            </form>
+            <!-- Div para exibir mensagens de sucesso ou erro ao usuário -->
+            <div id="message-box" class="message-box" style="display:none;"></div>
+        </section>
+    </main>
+
+    <!-- Script para inicializar o Firebase e gerenciar o cadastro -->
+    <script type="module">
+        // Importa as funções necessárias do Firebase SDK
+        // Usando a mesma versão (11.8.1) para consistência com o login.html
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+        // getAnalytics não é necessário para a funcionalidade de cadastro básica, então foi removido.
+
+        // Suas credenciais do Firebase (incorporadas diretamente neste arquivo)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXU_8LsG_i6l6AHZ59MSRpq8SV__GGfks",
+            authDomain: "banco-de-dados-42666.firebaseapp.com",
+            projectId: "banco-de-dados-42666",
+            storageBucket: "banco-de-dados-42666.firebasestorage.app",
+            messagingSenderId: "168919063881",
+            appId: "1:168919063881:web:6e765c4c44c6cda577ce98",
+            measurementId: "G-0YH78QXQ0H"
+        };
+
+        // Inicializa o Firebase com suas configurações
+        const app = initializeApp(firebaseConfig);
+        // Obtém a instância do serviço de autenticação do Firebase
+        const auth = getAuth(app);
+
+        // --- Funções Auxiliares ---
+
+        // Função para exibir mensagens dinamicamente na tela
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            // Adiciona classes CSS para estilizar a mensagem (verde para sucesso, vermelho para erro)
+            messageBox.className = `message-box ${type}`;
+            messageBox.style.display = 'block'; // Torna a caixa visível
+
+            // Esconde a mensagem automaticamente após 5 segundos
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // --- Lógica de Cadastro ---
+
+        // Pega o formulário de cadastro pelo ID
+        const signupForm = document.getElementById('signup-form');
+
+        // Adiciona um "ouvinte de evento" para quando o formulário for enviado
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Impede o comportamento padrão do formulário (que recarrega a página)
+
+            // Pega os valores digitados nos campos de e-mail, senha e confirmação de senha
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Validação: verifica se as senhas coincidem
+            if (password !== confirmPassword) {
+                showMessage('As senhas não coincidem!', 'error');
+                return; // Impede o envio do formulário se as senhas não combinarem
+            }
+
+            try {
+                // Tenta criar um novo usuário no Firebase com o e-mail e a senha fornecidos
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user; // O objeto user contém informações do usuário recém-criado
+
+                console.log('Usuário cadastrado com sucesso:', user); // Informação útil para depuração no console
+                showMessage('Cadastro realizado com sucesso! Redirecionando para o login...', 'success'); // Exibe mensagem de sucesso
+
+                // Redireciona o usuário para a página de login após o cadastro bem-sucedido
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000); // Redireciona após 2 segundos
+
+            } catch (error) {
+                // Captura e trata qualquer erro que o Firebase possa retornar durante o cadastro
+                let errorMessage = 'Erro ao cadastrar. Por favor, tente novamente.';
+
+                // Mensagens de erro mais amigáveis com base no código do erro do Firebase
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está em uso.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'O formato do e-mail é inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
+                        break;
+                    default:
+                        console.error('Erro de cadastro do Firebase:', error.message); // Log do erro completo para depuração
+                        errorMessage = `Ocorreu um erro inesperado: ${error.message}`;
+                        break;
+                }
+                showMessage(errorMessage, 'error'); // Exibe a mensagem de erro na tela
+            }
+        });
+    </script>
+</body>
+</html>

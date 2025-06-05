@@ -1,0 +1,192 @@
+/* style.css - Estilos Unificados para Login e Cadastro */
+
+/* Estilos Gerais do Body */
+body {
+    font-family: Arial, sans-serif; /* Define a fonte padrão para o corpo */
+    margin: 0; /* Remove margens padrão do corpo */
+    display: flex; /* Usa flexbox para centralizar o conteúdo */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    min-height: 100vh; /* Garante que o corpo ocupe a altura total da viewport */
+    background-color: #f0f2f5; /* Cor de fundo suave para a página */
+}
+
+/* Estilos para os Containers (Login e Cadastro) */
+/* Aplicado à tag <main> que envolve a seção de login/cadastro */
+main {
+    display: flex; /* Usa flexbox para o container principal */
+    justify-content: center; /* Centraliza o conteúdo da seção horizontalmente */
+    align-items: center; /* Centraliza o conteúdo da seção verticalmente */
+    width: 100%; /* Ocupa a largura total disponível */
+    padding: 20px; /* Adiciona um padding para evitar que o conteúdo encoste nas bordas */
+    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+}
+
+/* Estilos para as Caixas de Formulário (Login e Cadastro) */
+/* Aplicado à tag <section> que contém o formulário */
+section {
+    background-color: #fff; /* Fundo branco para a caixa */
+    padding: 30px; /* Espaçamento interno */
+    border-radius: 8px; /* Cantos arredondados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
+    width: 100%; /* Ocupa a largura total do container */
+    max-width: 400px; /* Largura máxima da caixa de formulário */
+    text-align: center; /* Centraliza o texto dentro da caixa */
+    box-sizing: border-box; /* Inclui padding e borda na largura total */
+}
+
+/* Títulos dos Formulários (Login e Cadastre-se) */
+section h2 {
+    margin-bottom: 25px; /* Margem inferior para separar do formulário */
+    color: #333; /* Cor do texto */
+    font-size: 28px; /* Tamanho da fonte */
+}
+
+/* Estilos para os Grupos de Input (div que envolve label e input) */
+.input-group {
+    margin-bottom: 20px; /* Espaçamento entre os grupos de input */
+    text-align: left; /* Alinha o texto (label) à esquerda */
+}
+
+/* Estilos para as Labels (Etiquetas dos Campos) */
+.input-group label {
+    display: block; /* Faz a label ocupar a linha inteira */
+    margin-bottom: 8px; /* Espaçamento entre a label e o input */
+    color: #555; /* Cor do texto */
+    font-weight: bold; /* Deixa o texto em negrito */
+}
+
+/* Estilos para os Campos de Input de Texto, E-mail e Senha */
+.input-group input[type="text"],
+.input-group input[type="email"],
+.input-group input[type="password"] {
+    width: calc(100% - 20px); /* Ocupa a largura total menos o padding */
+    padding: 12px 10px; /* Padding interno para os campos */
+    border: 1px solid #ddd; /* Borda fina e cinza */
+    border-radius: 5px; /* Cantos arredondados */
+    font-size: 16px; /* Tamanho da fonte do texto digitado */
+    box-sizing: border-box; /* Garante que padding e borda não aumentem a largura total */
+}
+
+/* Estilos ao Focar nos Campos de Input */
+.input-group input[type="text"]:focus,
+.input-group input[type="email"]:focus,
+.input-group input[type="password"]:focus {
+    border-color: #007bff; /* Borda azul ao focar */
+    outline: none; /* Remove o contorno padrão do navegador */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra azul suave ao focar */
+}
+
+/* Estilos Comuns para os Botões (Login e Cadastro) */
+.login-button,
+.signup-button {
+    background-color: #007bff; /* Cor de fundo azul padrão */
+    color: #fff; /* Cor do texto branco */
+    padding: 12px 20px; /* Padding interno */
+    border: none; /* Remove borda */
+    border-radius: 5px; /* Cantos arredondados */
+    font-size: 18px; /* Tamanho da fonte */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    width: 100%; /* Ocupa a largura total */
+    transition: background-color 0.3s ease; /* Transição suave na cor de fundo ao hover */
+}
+
+/* Estilo para o Botão de Cadastro (se quiser cor diferente) */
+.signup-button {
+    background-color: #28a745; /* Verde para o botão de cadastro */
+}
+
+/* Efeitos de Hover para Botões */
+.login-button:hover {
+    background-color: #0056b3; /* Azul mais escuro ao passar o mouse */
+}
+
+.signup-button:hover {
+    background-color: #218838; /* Verde mais escuro ao passar o mouse */
+}
+
+/* Estilos para os Parágrafos de Links (Esqueci Senha, Cadastre-se, Faça Login) */
+p {
+    margin-top: 15px; /* Margem superior */
+    font-size: 14px; /* Tamanho da fonte */
+}
+
+/* Estilos para os Links dentro dos Parágrafos */
+p a {
+    color: #007bff; /* Cor azul para os links */
+    text-decoration: none; /* Remove o sublinhado padrão */
+}
+
+/* Efeito de Hover para Links */
+p a:hover {
+    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
+}
+
+/* --- Estilos para a Caixa de Mensagem (Sucesso/Erro) --- */
+.message-box {
+    padding: 10px 15px; /* Espaçamento interno */
+    margin-top: 20px; /* Margem superior */
+    border-radius: 5px; /* Cantos arredondados */
+    font-size: 14px; /* Tamanho da fonte */
+    text-align: center; /* Texto centralizado */
+    color: #fff; /* Cor do texto branco */
+    font-weight: bold; /* Deixa o texto em negrito */
+    /* display: none; é definido via JS inicialmente */
+}
+
+.message-box.success {
+    background-color: #28a745; /* Fundo verde para mensagens de sucesso */
+}
+
+.message-box.error {
+    background-color: #dc3545; /* Fundo vermelho para mensagens de erro */
+}
+
+/* --- Estilos para a Página de Dashboard (se for usada) --- */
+/* Estes estilos já foram fornecidos na resposta anterior, mas estão aqui para referência */
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.dashboard-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.dashboard-box h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 28px;
+}
+
+.dashboard-box p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.logout-button {
+    background-color: #f44336; /* Vermelho para sair */
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #d32f2f; /* Vermelho mais escuro ao hover */
+}

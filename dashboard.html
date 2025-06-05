@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Meu Projeto</title>
+    <!-- O ícone do favicon pode ser o mesmo usado nas outras páginas -->
+    <link rel="shortcut icon" type="image/x-icon" href="ASS/Html.png">
+
+    <!-- Seu arquivo de estilos CSS -->
+    <link rel="stylesheet" href="R.css">
+</head>
+<body>
+    <main class="dashboard-container">
+        <section class="dashboard-box">
+            <h2 id="welcome-message">Bem-vindo(a)!</h2>
+            <p>Você acessou o painel de controle do seu projeto.</p>
+            <p>Aqui você pode adicionar o conteúdo exclusivo para usuários logados.</p>
+
+            <!-- Botão de Sair (Logout) -->
+            <button id="logout-button" class="logout-button">Sair</button>
+
+            <!-- Div para exibir mensagens (ex: logout bem-sucedido) -->
+            <div id="message-box" class="message-box" style="display:none;"></div>
+        </section>
+    </main>
+
+    <!-- Script para inicializar o Firebase, gerenciar a sessão e o logout -->
+    <script type="module">
+        // Importa as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+        // Suas credenciais do Firebase (as mesmas usadas em login.html e cadastrar.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXU_8LsG_i6l6AHZ59MSRpq8SV__GGfks",
+            authDomain: "banco-de-dados-42666.firebaseapp.com",
+            projectId: "banco-de-dados-42666",
+            storageBucket: "banco-de-dados-42666.firebasestorage.app",
+            messagingSenderId: "168919063881",
+            appId: "1:168919063881:web:6e765c4c44c6cda577ce98",
+            measurementId: "G-0YH78QXQ0H"
+        };
+
+        // Inicializa o Firebase com suas configurações
+        const app = initializeApp(firebaseConfig);
+        // Obtém a instância do serviço de autenticação do Firebase
+        const auth = getAuth(app);
+
+        // --- Funções Auxiliares ---
+
+        // Função para exibir mensagens dinamicamente na tela
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // --- Lógica de Proteção de Rota e Logout ---
+
+        // Observa mudanças no estado de autenticação do usuário
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado
+                console.log('Usuário logado:', user.email);
+                document.getElementById('welcome-message').textContent = `Bem-vindo(a), ${user.email}!`;
+                // Se o usuário não tiver um nome de exibição, use o e-mail
+            } else {
+                // Usuário NÃO está logado
+                console.log('Nenhum usuário logado. Redirecionando para a página de login...');
+                showMessage('Você precisa estar logado para acessar esta página.', 'error');
+                // Redireciona para a página de login se não houver usuário autenticado
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000); // Redireciona após 2 segundos para dar tempo de ver a mensagem
+            }
+        });
+
+        // Lidar com o clique do botão de logout
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                await signOut(auth); // Desloga o usuário do Firebase
+                console.log('Usuário deslogado com sucesso.');
+                showMessage('Sessão encerrada com sucesso! Redirecionando...', 'success');
+                // Redireciona para a página de login após o logout
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error.message);
+                showMessage('Erro ao sair. Por favor, tente novamente.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
