@@ -4,32 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Meu Projeto</title>
-    <!-- O ícone do favicon pode ser o mesmo usado nas outras páginas -->
+    <!-- O ícone do favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="ASS/Html.png">
 
     <!-- Seu arquivo de estilos CSS -->
-    <link rel="stylesheet" href="R.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <main class="dashboard-container">
         <section class="dashboard-box">
             <h2 id="welcome-message">Bem-vindo(a)!</h2>
             <p>Você acessou o painel de controle do seu projeto.</p>
-            <p>Aqui você pode adicionar o conteúdo exclusivo para usuários logados.</p>
+
+            <!-- Informações do Usuário Logado -->
+            <div class="user-info">
+                <h3>Informações da Conta</h3>
+                <p><strong>E-mail:</strong> <span id="user-email">Carregando...</span></p>
+                <p><strong>ID do Usuário:</strong> <span id="user-uid">Carregando...</span></p>
+            </div>
+
+            <hr> <!-- Separador visual -->
+
+            <!-- Seção de Salvar Novas Senhas -->
+            <div class="password-saver">
+                <h3>Salvar Nova Senha</h3>
+                <form id="save-password-form">
+                    <div class="input-group">
+                        <label for="service-name">Nome do Serviço (ex: Google, Facebook)</label>
+                        <input type="text" id="service-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="saved-password">Senha</label>
+                        <input type="password" id="saved-password" required>
+                    </div>
+                    <button type="submit" class="save-button">Salvar Senha</button>
+                </form>
+                <p class="security-warning">
+                    <strong>AVISO DE SEGURANÇA:</strong> Para uma aplicação real, senhas devem ser criptografadas antes de serem armazenadas ou apenas referências a um gerenciador de senhas seguro devem ser usadas. Armazenar senhas em texto puro é perigoso.
+                </p>
+            </div>
+
+            <hr> <!-- Separador visual -->
+
+            <!-- Seção de Senhas Salvas -->
+            <div class="saved-passwords-list">
+                <h3>Minhas Senhas Salvas</h3>
+                <ul id="passwords-list">
+                    <!-- Senhas serão carregadas aqui via JavaScript -->
+                    <li>Nenhuma senha salva ainda.</li>
+                </ul>
+            </div>
 
             <!-- Botão de Sair (Logout) -->
             <button id="logout-button" class="logout-button">Sair</button>
 
-            <!-- Div para exibir mensagens (ex: logout bem-sucedido) -->
+            <!-- Div para exibir mensagens (ex: logout bem-sucedido, senha salva) -->
             <div id="message-box" class="message-box" style="display:none;"></div>
         </section>
     </main>
 
-    <!-- Script para inicializar o Firebase, gerenciar a sessão e o logout -->
+    <!-- Script para inicializar o Firebase, gerenciar a sessão, salvar/carregar senhas e o logout -->
     <script type="module">
-        // Importa as funções necessárias do Firebase SDK
+        // Importa as funções necessárias do Firebase SDK (Autenticação e Realtime Database)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+        // Importa as funções do Realtime Database
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
         // Suas credenciais do Firebase (as mesmas usadas em login.html e cadastrar.html)
         const firebaseConfig = {
@@ -44,8 +84,11 @@
 
         // Inicializa o Firebase com suas configurações
         const app = initializeApp(firebaseConfig);
-        // Obtém a instância do serviço de autenticação do Firebase
+        // Obtém as instâncias dos serviços de autenticação e Realtime Database
         const auth = getAuth(app);
+        const db = getDatabase(app); // Inicializa o Realtime Database
+
+        let userId = null; // Variável para armazenar o UID do usuário logado
 
         // --- Funções Auxiliares ---
 
@@ -61,15 +104,21 @@
             }, 5000);
         }
 
-        // --- Lógica de Proteção de Rota e Logout ---
+        // --- Lógica de Autenticação e Carregamento de Dados ---
 
         // Observa mudanças no estado de autenticação do usuário
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // Usuário está logado
+                userId = user.uid; // Guarda o UID do usuário
                 console.log('Usuário logado:', user.email);
                 document.getElementById('welcome-message').textContent = `Bem-vindo(a), ${user.email}!`;
-                // Se o usuário não tiver um nome de exibição, use o e-mail
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-uid').textContent = user.uid;
+
+                // Carrega as senhas do Realtime Database assim que o usuário estiver logado
+                loadUserPasswords(userId);
+
             } else {
                 // Usuário NÃO está logado
                 console.log('Nenhum usuário logado. Redirecionando para a página de login...');
@@ -77,9 +126,11 @@
                 // Redireciona para a página de login se não houver usuário autenticado
                 setTimeout(() => {
                     window.location.href = 'login.html';
-                }, 2000); // Redireciona após 2 segundos para dar tempo de ver a mensagem
+                }, 2000);
             }
         });
+
+        // --- Lógica de Logout ---
 
         // Lidar com o clique do botão de logout
         document.getElementById('logout-button').addEventListener('click', async () => {
@@ -97,6 +148,94 @@
                 showMessage('Erro ao sair. Por favor, tente novamente.', 'error');
             }
         });
+
+        // --- Lógica de Salvar Senhas no Realtime Database ---
+
+        const savePasswordForm = document.getElementById('save-password-form');
+        savePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!userId) {
+                showMessage('Erro: Usuário não logado. Por favor, faça login novamente.', 'error');
+                return;
+            }
+
+            const serviceName = document.getElementById('service-name').value.trim();
+            const savedPassword = document.getElementById('saved-password').value.trim();
+
+            if (!serviceName || !savedPassword) {
+                showMessage('Por favor, preencha o nome do serviço e a senha.', 'error');
+                return;
+            }
+
+            try {
+                // Cria uma referência para o nó 'passwords' dentro do UID do usuário
+                const userPasswordsRef = ref(db, `users/${userId}/passwords`);
+                // Adiciona um novo item à lista de senhas, gerando uma chave única (push)
+                // IMPORTANTE: Em um ambiente de produção, implemente criptografia forte para as senhas!
+                await push(userPasswordsRef, {
+                    service: serviceName,
+                    password: savedPassword, // AVISO DE SEGURANÇA: NUNCA armazene senhas em texto puro em produção!
+                    createdAt: new Date().toISOString() // Armazena a data/hora da criação
+                });
+
+                showMessage('Senha salva com sucesso!', 'success');
+                savePasswordForm.reset(); // Limpa o formulário após salvar
+
+            } catch (error) {
+                console.error('Erro ao salvar senha:', error.message);
+                showMessage('Erro ao salvar senha. Tente novamente.', 'error');
+            }
+        });
+
+        // --- Lógica de Carregar e Exibir Senhas do Realtime Database (Realtime) ---
+
+        function loadUserPasswords(uid) {
+            const passwordsList = document.getElementById('passwords-list');
+            const userPasswordsRef = ref(db, `users/${uid}/passwords`);
+
+            // Usa onValue para ouvir atualizações em tempo real
+            onValue(userPasswordsRef, (snapshot) => {
+                passwordsList.innerHTML = ''; // Limpa a lista existente
+
+                if (!snapshot.exists()) { // Verifica se o snapshot tem dados
+                    passwordsList.innerHTML = '<li>Nenhuma senha salva ainda.</li>';
+                    return;
+                }
+
+                // Itera sobre os filhos do snapshot (cada senha)
+                snapshot.forEach((childSnapshot) => {
+                    const passwordId = childSnapshot.key; // A chave única gerada pelo push
+                    const data = childSnapshot.val(); // Os dados da senha
+
+                    const li = document.createElement('li');
+                    li.classList.add('password-item'); // Adiciona classe para estilização
+
+                    li.innerHTML = `
+                        <strong>Serviço:</strong> ${data.service} <br>
+                        <strong>Senha:</strong> ${data.password}
+                        <button class="delete-button" data-id="${passwordId}">Excluir</button>
+                    `;
+                    passwordsList.appendChild(li);
+
+                    // Adiciona evento de clique para o botão de exclusão
+                    li.querySelector('.delete-button').addEventListener('click', async (e) => {
+                        const idToDelete = e.target.dataset.id;
+                        try {
+                            // Remove a senha usando a referência específica do nó
+                            await remove(ref(db, `users/${uid}/passwords/${idToDelete}`));
+                            showMessage('Senha excluída com sucesso!', 'success');
+                        } catch (error) {
+                            console.error('Erro ao excluir senha:', error.message);
+                            showMessage('Erro ao excluir senha.', 'error');
+                        }
+                    });
+                });
+            }, (error) => {
+                console.error('Erro ao carregar senhas:', error);
+                showMessage('Erro ao carregar suas senhas.', 'error');
+            });
+        }
     </script>
 </body>
 </html>
